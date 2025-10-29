@@ -1,0 +1,48 @@
+# Create .gitignore file
+@"
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Virtual Environment (NEVER commit this!)
+dms_env/
+env/
+venv/
+ENV/
+
+# Datasets (too large)
+datasets/
+datasets_processed/
+
+# Training outputs
+runs/
+*.pth
+*.pt
+
+# Logs
+logs/
+*.log
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Keep only scripts and docs
+!*.py
+!*.md
+!*.txt
+!*.sh
+!*.bat
+
+# Model exports (small files only)
+exports/*.onnx
+exports/*.blob
+"@ | Out-File -FilePath ".gitignore" -Encoding UTF8
