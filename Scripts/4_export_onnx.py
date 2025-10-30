@@ -3,7 +3,7 @@ Step 4: Export Models to ONNX for OAK-D Deployment
 ---------------------------------------------------
 Exports trained PyTorch models to ONNX format for edge deployment.
 
-Run: python 4_export_onnx.py --model all
+Run: python Scripts/4_export_onnx.py --model all
 """
 
 import os
@@ -51,7 +51,7 @@ def export_to_onnx(model_name, img_size=112):
     # Check if checkpoint exists
     if not os.path.exists(checkpoint_path):
         print(f"❌ Checkpoint not found: {checkpoint_path}")
-        print(f"   Train the model first: python 3_train_models.py --model {model_name}")
+        print(f"   Train the model first: python Scripts/3_train_models.py --model {model_name}")
         return False
     
     print(f"\n[Exporting {model_name}]")
@@ -175,12 +175,12 @@ if __name__ == "__main__":
                 print(f"  {model_name:15s}: {onnx_file} ({size_mb:.2f} MB)")
         
         print("\nNext steps:")
-        print("  1. Test on webcam: python 5_test_webcam.py")
-        print("  2. Deploy to OAK-D: python 6_deploy_oakd.py")
+        print("  1. Test on webcam: python Scripts/5_test_webcam.py")
+        print("  2. Deploy to OAK-D: python Scripts/6_deploy_oakd.py")
         
         if not args.create_blob:
             print("\nTo create .blob files for OAK-D:")
-            print("  python 4_export_onnx.py --model all --create-blob")
+            print("  python Scripts/4_export_onnx.py --model all --create-blob")
     else:
         print("\n❌ No models exported. Train models first:")
-        print("  python 3_train_models.py --model all")
+        print("  python Scripts/3_train_models.py --model all")

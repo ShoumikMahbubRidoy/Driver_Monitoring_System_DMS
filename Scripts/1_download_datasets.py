@@ -17,9 +17,9 @@ import gdown
 from pathlib import Path
 
 # Create project structure
-DATASET_ROOT = "./datasets"
-MODELS_DIR = "./models"
-RUNS_DIR = "./runs"
+DATASET_ROOT = "../datasets"
+MODELS_DIR = "../models"
+RUNS_DIR = "../runs"
 
 def create_project_structure():
     """Create all necessary folders"""

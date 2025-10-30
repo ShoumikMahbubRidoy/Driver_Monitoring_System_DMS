@@ -24,7 +24,7 @@ import time
 from collections import deque
 
 class OAKDDriverMonitoring:
-    def __init__(self, blob_dir='./exports'):
+    def __init__(self, blob_dir='../exports'):
         """Initialize OAK-D DMS system"""
         self.blob_dir = Path(blob_dir)
         

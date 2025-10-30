@@ -3,14 +3,7 @@ Step 5: Test Driver Monitoring System on Webcam
 ------------------------------------------------
 Real-time testing using webcam before deploying to OAK-D.
 
-Features:
-- Face detection
-- Eye state detection (open/closed)
-- Yawn detection
-- Drowsiness alerts with temporal smoothing
-- FPS counter
-
-Run: python 5_test_webcam.py
+Run: python Scripts/5_test_webcam.py
 """
 
 import cv2
@@ -69,18 +62,14 @@ class DriverMonitoringSystem:
         ])
         
         # Temporal smoothing (reduce false alarms)
-        self.eye_history = deque(maxlen=10)  # Last 10 frames
+        self.eye_history = deque(maxlen=10)
         self.yawn_history = deque(maxlen=20)
         self.drowsy_history = deque(maxlen=15)
         
         # Alert thresholds
-        self.eye_closed_threshold = 0.7  # 70% of frames show closed eyes
-        self.yawn_threshold = 0.4  # 40% of frames show yawning
-        self.drowsy_threshold = 0.6  # 60% confidence for drowsiness
-        
-        # Alert counters
-        self.alert_start_time = None
-        self.consecutive_alerts = 0
+        self.eye_closed_threshold = 0.7
+        self.yawn_threshold = 0.4
+        self.drowsy_threshold = 0.6
     
     def load_model(self, checkpoint_path):
         """Load trained model from checkpoint"""
@@ -104,17 +93,20 @@ class DriverMonitoringSystem:
     def predict(self, model, image):
         """Run inference on a single image"""
         if model is None:
-            return None, 0.0
+            return 0, 0.0
         
-        # Preprocess
-        img_tensor = self.transform(image).unsqueeze(0).to(self.device)
-        
-        # Inference
-        output = model(img_tensor)
-        probs = torch.softmax(output, dim=1)
-        confidence, pred = torch.max(probs, 1)
-        
-        return pred.item(), confidence.item()
+        try:
+            # Preprocess
+            img_tensor = self.transform(image).unsqueeze(0).to(self.device)
+            
+            # Inference
+            output = model(img_tensor)
+            probs = torch.softmax(output, dim=1)
+            confidence, pred = torch.max(probs, 1)
+            
+            return pred.item(), confidence.item()
+        except Exception as e:
+            return 0, 0.0
     
     def detect_drowsiness(self, frame):
         """Main detection pipeline"""
@@ -152,7 +144,7 @@ class DriverMonitoringSystem:
         # Eye state detection
         eye_closed_count = 0
         if len(eyes) > 0:
-            for (ex, ey, ew, eh) in eyes[:2]:  # Process max 2 eyes
+            for (ex, ey, ew, eh) in eyes[:2]:
                 # Draw eye boxes
                 cv2.rectangle(frame, (x+ex, y+ey), (x+ex+ew, y+ey+eh), (0, 255, 0), 1)
                 
@@ -160,17 +152,23 @@ class DriverMonitoringSystem:
                 eye_roi = rgb[y+ey:y+ey+eh, x+ex:x+ex+ew]
                 if eye_roi.size > 0:
                     eye_pred, eye_conf = self.predict(self.eye_model, eye_roi)
-                    # 1 = closed (based on typical class order)
-                    if eye_pred == 1:
+                    
+                    # Debug: Print prediction
+                    print(f"Eye prediction: {eye_pred}, confidence: {eye_conf:.2f}")
+                    
+                    # Reverse the logic if needed
+                    # If class 0 = closed, class 1 = open, then reverse:
+                    if eye_pred == 0:  # Changed from 1 to 0
                         eye_closed_count += 1
                     
                     # Display eye state
-                    state_text = "Closed" if eye_pred == 1 else "Open"
+                    state_text = "Closed" if eye_pred == 0 else "Open"  # Changed
                     cv2.putText(frame, state_text, (x+ex, y+ey-5),
-                               cv2.FONT_HERSHEY_SIMPLEX, 0.4, (0, 255, 0), 1)
+                            cv2.FONT_HERSHEY_SIMPLEX, 0.4, (0, 255, 0), 1)
         
-        # Record eye state
-        self.eye_history.append(eye_closed_count >= len(eyes) if len(eyes) > 0 else False)
+        # Record eye state (True if eyes closed)
+        eyes_closed = eye_closed_count >= len(eyes) if len(eyes) > 0 else False
+        self.eye_history.append(1 if eyes_closed else 0)
         
         # Calculate temporal averages
         eye_closed_ratio = sum(self.eye_history) / len(self.eye_history) if self.eye_history else 0
@@ -178,25 +176,18 @@ class DriverMonitoringSystem:
         drowsy_ratio = sum(self.drowsy_history) / len(self.drowsy_history) if self.drowsy_history else 0
         
         # Determine alert status
-        alert_text = "ALERT"
-        alert_color = (0, 255, 0)  # Green
-        
         if eye_closed_ratio > self.eye_closed_threshold:
             alert_text = "⚠ EYES CLOSED - WAKE UP!"
             alert_color = (0, 0, 255)  # Red
-            self.consecutive_alerts += 1
         elif yawn_ratio > self.yawn_threshold:
-            alert_text = "⚠ YAWNING DETECTED - FATIGUE!"
+            alert_text = "⚠ YAWNING - FATIGUE!"
             alert_color = (0, 165, 255)  # Orange
-            self.consecutive_alerts += 1
         elif drowsy_ratio > self.drowsy_threshold:
             alert_text = "⚠ DROWSINESS DETECTED!"
             alert_color = (0, 165, 255)  # Orange
-            self.consecutive_alerts += 1
         else:
             alert_text = "ALERT - SAFE DRIVING"
-            alert_color = (0, 255, 0)
-            self.consecutive_alerts = 0
+            alert_color = (0, 255, 0)  # Green
         
         # Display stats
         stats_y = 30
@@ -285,6 +276,6 @@ if __name__ == "__main__":
     except FileNotFoundError as e:
         print(f"\n❌ Error: {e}")
         print("\nMake sure you have trained models:")
-        print("  python 3_train_models.py --model all")
+        print("  python Scripts/3_train_models.py --model all")
     except KeyboardInterrupt:
         print("\n\n✓ Stopped by user")
