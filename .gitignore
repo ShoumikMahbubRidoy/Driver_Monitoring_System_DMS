@@ -1,34 +1,28 @@
-# === Python Cache Files ===
-__pycache__/
-*.py[cod]
-*$py.class
-*.so
-.Python
-
-# === Virtual Environments (Never commit) ===
+# venv
 dms_env/
 env/
 venv/
 ENV/
 
-# === IDE / Editor Settings ===
-.vscode/
-.idea/
-*.swp
-
-# === OS Generated Files ===
-.DS_Store
-Thumbs.db
-
-# === Optional: Logs or Large Model Files ===
+# caches / logs
+__pycache__/
 *.log
-*.pth
-*.pt
 
-# === Keep everything else (datasets, exports, scripts, docs, etc.) ===
-!*/
-!*.py
-!*.md
-!*.txt
-!*.sh
-!*.bat
+# training outputs & datasets
+runs/
+datasets/
+datasets_processed/
+DataSet/
+
+# models / binaries (keep out)
+*.onnx
+*.onnx.data
+*.pt
+*.pth
+*.zip
+*.tar
+*.tar.gz
+*.mp4
+*.jpg
+*.png
+*.csv
