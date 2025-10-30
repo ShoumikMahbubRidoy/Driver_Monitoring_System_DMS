@@ -4,19 +4,17 @@ env/
 venv/
 ENV/
 
-# caches / logs
+# caches/logs
 __pycache__/
 *.log
 
-# training outputs & datasets
-runs/
+# heavy data & outputs
 datasets/
-datasets_processed/
-DataSet/
+dataset/
+runs/
+exports/*.onnx.data
 
-# models / binaries (keep out)
-*.onnx
-*.onnx.data
+# large binaries (keep out or use LFS)
 *.pt
 *.pth
 *.zip
